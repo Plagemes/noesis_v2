@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOESIS OS - Demo Navigabile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+        .card {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        .nav-item {
+            transition: all 0.3s ease;
+        }
+        .nav-item:hover {
+            transform: translateX(8px);
+            background: rgba(102, 126, 234, 0.1);
+        }
+        .nav-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .kpi-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+        .kpi-card:hover {
+            transform: translateY(-4px);
+        }
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        .status-aperto { background: #fee2e2; color: #991b1b; }
+        .status-chiuso { background: #d1fae5; color: #065f46; }
+        .status-in-corso { background: #dbeafe; color: #1e40af; }
+        .status-confermato { background: #d1fae5; color: #065f46; }
+        .status-completato { background: #e5e7eb; color: #374151; }
+        .table-row {
+            transition: background 0.2s ease;
+        }
+        .table-row:hover {
+            background: rgba(102, 126, 234, 0.05);
+        }
+        #content {
+            min-height: 600px;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="card mb-6 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                        NOESIS OS
+                    </h1>
+                    <p class="text-gray-600 mt-2">Centro Operativo Aziendale - Demo Navigabile</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm text-gray-500">19 Giugno 2026</p>
+                    <p class="text-sm font-semibold text-gray-700">Operatore Demo</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Sidebar Navigation -->
+            <div class="lg:col-span-1">
+                <div class="card p-4 sticky top-4">
+                    <nav class="space-y-2">
+                        <button onclick="showPage('dashboard')" class="nav-item active w-full text-left px-4 py-3 rounded-lg flex items-center gap-3">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Dashboard</span>
+                        </button>
+                        <button onclick="showPage('alert')" class="nav-item w-full text-left px-4 py-3 rounded-lg flex items-center gap-3">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Alert</span>
+                        </button>
+                        <button onclick="showPage('servizi')" class="nav-item w-full text-left px-4 py-3 rounded-lg flex items-center gap-3">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Servizi</span>
+                        </button>
+                        <button onclick="showPage('turni')" class="nav-item w-full text-left px-4 py-3 rounded-lg flex items-center gap-3">
+                            <i class="fas fa-clock"></i>
+                            <span>Turni</span>
+                        </button>
+                        <button onclick="showPage('operatori')" class="nav-item w-full text-left px-4 py-3 rounded-lg flex items-center gap-3">
+                            <i class="fas fa-users"></i>
+                            <span>Operatori</span>
+                        </button>
+                        <button onclick="showPage('timesheet')" class="nav-item w-full text-left px-4 py-3 rounded-lg flex items-center gap-3">
+                            <i class="fas fa-clipboard-check"></i>
+                            <span>Timesheet</span>
+                        </button>
+                        <button onclick="showPage('commesse')" class="nav-item w-full text-left px-4 py-3 rounded-lg flex items-center gap-3">
+                            <i class="fas fa-briefcase"></i>
+                            <span>Commesse</span>
+                        </button>
+                        <button onclick="showPage('calendario')" class="nav-item w-full text-left px-4 py-3 rounded-lg flex items-center gap-3">
+                            <i class="fas fa-calendar"></i>
+                            <span>Calendario</span>
+                        </button>
+                        <button onclick="showPage('amministrazione')" class="nav-item w-full text-left px-4 py-3 rounded-lg flex items-center gap-3">
+                            <i class="fas fa-euro-sign"></i>
+                            <span>Amministrazione</span>
+                        </button>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="lg:col-span-3">
+                <div id="content" class="card p-6">
+                    <!-- Content will be dynamically loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock Data
+        const data = {
+            kpi: {
+                alertAperti: 12,
+                turniOggi: 8,
+                serviziAttivi: 23,
+                ricaviMese: '€ 142.350',
+                operatoriAttivi: 87,
+                copertura: 94
+            },
+            alerts: [
+                { id: 'ALT-001', alert: 'Turno scoperto', servizio: 'Notte Rosa 2026', priorita: 'Alta', stato: 'Aperto', data: '2026-06-19 14:30' },
+                { id: 'ALT-002', alert: 'Operatore assente', servizio: 'TTG Travel Experience', priorita: 'Media', stato: 'Aperto', data: '2026-06-19 10:15' },
+                { id: 'ALT-003', alert: 'Documento scaduto', servizio: 'Sicurezza Grand Hotel', priorita: 'Alta', stato: 'Aperto', data: '2026-06-19 09:00' },
+                { id: 'ALT-004', alert: 'Richiesta modifica turno', servizio: 'Congresso Medico', priorita: 'Bassa', stato: 'Chiuso', data: '2026-06-18 16:45' },
+                { id: 'ALT-005', alert: 'Superamento ore straordinario', servizio: 'Notte Rosa 2026', priorita: 'Media', stato: 'Aperto', data: '2026-06-18 14:20' }
+            ],
+            servizi: [
+                { id: 'srv-001', nome: 'Notte Rosa 2026', cliente: 'Comune di Rimini', tipo: 'Sicurezza', dataInizio: '2026-07-04', dataFine: '2026-07-05', stato: 'Confermato', persone: 25, copertura: 88 },
+                { id: 'srv-002', nome: 'TTG Travel Experience', cliente: 'Fiera di Rimini', tipo: 'Steward', dataInizio: '2026-10-14', dataFine: '2026-10-16', stato: 'In corso', persone: 18, copertura: 100 },
+                { id: 'srv-003', nome: 'Sicurezza Grand Hotel', cliente: 'Grand Hotel', tipo: 'Sicurezza', dataInizio: '2026-06-01', dataFine: '2026-09-30', stato: 'In corso', persone: 2, copertura: 100 },
+                { id: 'srv-004', nome: 'Congresso Medico', cliente: 'Riviera Congress', tipo: 'Accoglienza', dataInizio: '2026-09-20', dataFine: '2026-09-22', stato: 'Confermato', persone: 12, copertura: 75 }
+            ],
+            turni: [
+                { id: 'TRN-001', servizio: 'Notte Rosa 2026', operatore: 'Mario Rossi', ruolo: 'Capo servizio', data: '2026-07-04', orario: '20:00-04:00', stato: 'Confermato' },
+                { id: 'TRN-002', servizio: 'TTG Travel', operatore: 'Laura Bianchi', ruolo: 'Steward', data: '2026-10-14', orario: '08:00-14:00', stato: 'Confermato' },
+                { id: 'TRN-003', servizio: 'Grand Hotel', operatore: 'Giuseppe Verdi', ruolo: 'GPG', data: '2026-06-19', orario: '22:00-06:00', stato: 'In corso' },
+                { id: 'TRN-004', servizio: 'Congresso Medico', operatore: 'Anna Neri', ruolo: 'Hostess', data: '2026-09-20', orario: '09:00-18:00', stato: 'Confermato' },
+                { id: 'TRN-005', servizio: 'Notte Rosa 2026', operatore: 'Paolo Ferrari', ruolo: 'GPG', data: '2026-07-04', orario: '20:00-04:00', stato: 'Confermato' }
+            ],
+            operatori: [
+                { id: 'OP-001', nome: 'Mario Rossi', qualifica: 'Capo servizio', telefono: '+39 333 1234567', email: 'mario.rossi@noesis.it', disponibile: true, turniMese: 18 },
+                { id: 'OP-002', nome: 'Laura Bianchi', qualifica: 'Steward', telefono: '+39 333 2345678', email: 'laura.bianchi@noesis.it', disponibile: true, turniMese: 22 },
+                { id: 'OP-003', nome: 'Giuseppe Verdi', qualifica: 'GPG', telefono: '+39 333 3456789', email: 'giuseppe.verdi@noesis.it', disponibile: false, turniMese: 20 },
+                { id: 'OP-004', nome: 'Anna Neri', qualifica: 'Hostess', telefono: '+39 333 4567890', email: 'anna.neri@noesis.it', disponibile: true, turniMese: 15 }
+            ],
+            commesse: [
+                { id: 'COM-001', nome: 'Appalto Fiera 2026', cliente: 'Fiera di Rimini', valore: '€ 285.000', dataInizio: '2026-01-01', dataFine: '2026-12-31', stato: 'In corso', fatturato: '€ 142.500' },
+                { id: 'COM-002', nome: 'Evento Riviera', cliente: 'Comune di Rimini', valore: '€ 150.000', dataInizio: '2026-06-01', dataFine: '2026-09-30', stato: 'In corso', fatturato: '€ 75.000' },
+                { id: 'COM-003', nome: 'Servizio GH', cliente: 'Grand Hotel', valore: '€ 45.000', dataInizio: '2026-06-01', dataFine: '2026-09-30', stato: 'In corso', fatturato: '€ 15.000' }
+            ]
+        };
+
+        // Page Templates
+        const pages = {
+            dashboard: () => `
+                <div>
+                    <div class="flex items-center gap-3 mb-6">
+                        <i class="fas fa-chart-line text-3xl text-purple-600"></i>
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-800">Dashboard</h2>
+                            <p class="text-gray-600">Panoramica generale del centro operativo</p>
+                        </div>
+                    </div>
+
+                    <!-- KPI Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                        <div class="kpi-card">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm opacity-90">Alert Aperti</p>
+                                    <p class="text-3xl font-bold mt-1">${data.kpi.alertAperti}</p>
+                                </div>
+                                <i class="fas fa-exclamation-triangle text-4xl opacity-50"></i>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm opacity-90">Turni Oggi</p>
+                                    <p class="text-3xl font-bold mt-1">${data.kpi.turniOggi}</p>
+                                </div>
+                                <i class="fas fa-clock text-4xl opacity-50"></i>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm opacity-90">Servizi Attivi</p>
+                                    <p class="text-3xl font-bold mt-1">${data.kpi.serviziAttivi}</p>
+                                </div>
+                                <i class="fas fa-briefcase text-4xl opacity-50"></i>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm opacity-90">Ricavi Mese</p>
+                                    <p class="text-3xl font-bold mt-1">${data.kpi.ricaviMese}</p>
+                                </div>
+                                <i class="fas fa-euro-sign text-4xl opacity-50"></i>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm opacity-90">Operatori Attivi</p>
+                                    <p class="text-3xl font-bold mt-1">${data.kpi.operatoriAttivi}</p>
+                                </div>
+                                <i class="fas fa-users text-4xl opacity-50"></i>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm opacity-90">Copertura Media</p>
+                                    <p class="text-3xl font-bold mt-1">${data.kpi.copertura}%</p>
+                                </div>
+                                <i class="fas fa-chart-pie text-4xl opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Alerts -->
+                    <div class="mb-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <i class="fas fa-exclamation-triangle text-red-600"></i>
+                            Alert Recenti
+                        </h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50 border-b-2 border-gray-200">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Alert</th>
+                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Servizio</th>
+                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Priorità</th>
+                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Stato</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.alerts.slice(0, 5).map(alert => `
+                                        <tr class="table-row border-b border-gray-100">
+                                            <td class="px-4 py-3">
+                                                <div class="font-medium text-gray-900">${alert.alert}</div>
+                                                <div class="text-sm text-gray-500">${alert.id}</div>
+                                            </td>
+                                            <td class="px-4 py-3 text-gray-700">${alert.servizio}</td>
+                                            <td class="px-4 py-3">
+                                                <span class="status-badge ${alert.priorita === 'Alta' ? 'bg-red-100 text-red-800' : alert.priorita === 'Media' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'}">
+                                                    ${alert.priorita}
+                                                </span>
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                <span class="status-badge status-${alert.stato.toLowerCase()}">${alert.stato}</span>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Upcoming Shifts -->
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <i class="fas fa-clock text-blue-600"></i>
+                            Prossimi Turni
+                        </h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50 border-b-2 border-gray-200">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Servizio</th>
+                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Operatore</th>
+                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Data</th>
+                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Orario</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.turni.slice(0, 5).map(turno => `
+                                        <tr class="table-row border-b border-gray-100">
+                                            <td class="px-4 py-3 font-medium text-gray-900">${turno.servizio}</td>
+                                            <td class="px-4 py-3 text-gray-700">${turno.operatore}</td>
+                                            <td class="px-4 py-3 text-gray-700">${turno.data}</td>
+                                            <td class="px-4 py-3 text-gray-700">${turno.orario}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `,
+            alert: () => `
+                <div>
+                    <div class="flex items-center gap-3 mb-6">
+                        <i class="fas fa-exclamation-triangle text-3xl text-red-600"></i>
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-800">Alert e Notifiche</h2>
+                            <p class="text-gray-600">Gestione degli alert operativi</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-6 flex gap-4">
+                        <button class="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-semibold hover:shadow-lg transition">
+                            <i class="fas fa-plus mr-2"></i>Nuovo Alert
+                        </button>
+                        <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition">
+                            <i class="fas fa-filter mr-2"></i>Filtri
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50 border-b-2 border-gray-200">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">ID</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Alert</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Servizio</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Priorità</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Stato</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Data/Ora</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.alerts.map(alert => `
+                                    <tr class="table-row border-b border-gray-100">
+                                        <td class="px-4 py-3 text-gray-700 font-mono">${alert.id}</td>
+                                        <td class="px-4 py-3 font-medium text-gray-900">${alert.alert}</td>
+                                        <td class="px-4 py-3 text-gray-700">${alert.servizio}</td>
+                                        <td class="px-4 py-3">
+                                            <span class="status-badge ${alert.priorita === 'Alta' ? 'bg-red-100 text-red-800' : alert.priorita === 'Media' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'}">
+                                                ${alert.priorita}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <span class="status-badge status-${alert.stato.toLowerCase()}">${alert.stato}</span>
+                                        </td>
+                                        <td class="px-4 py-3 text-gray-700 text-sm">${alert.data}</td>
+                                        <td class="px-4 py-3">
+                                            <button class="text-blue-600 hover:text-blue-800 mr-2" title="Visualizza">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="text-green-600 hover:text-green-800 mr-2" title="Risolvi">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            <button class="text-red-600 hover:text-red-800" title="Elimina">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `,
+            servizi: () => `
+                <div>
+                    <div class="flex items-center gap-3 mb-6">
+                        <i class="fas fa-calendar-alt text-3xl text-purple-600"></i>
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-800">Servizi</h2>
+                            <p class="text-gray-600">Gestione dei servizi e degli eventi</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-6 flex gap-4">
+                        <button class="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-semibold hover:shadow-lg transition">
+                            <i class="fas fa-plus mr-2"></i>Nuovo Servizio
+                        </button>
+                        <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition">
+                            <i class="fas fa-filter mr-2"></i>Filtri
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50 border-b-2 border-gray-200">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Servizio</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Cliente</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Tipo</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Periodo</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Stato</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Persone</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Copertura</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.servizi.map(srv => `
+                                    <tr class="table-row border-b border-gray-100">
+                                        <td class="px-4 py-3">
+                                            <div class="font-medium text-gray-900">${srv.nome}</div>
+                                            <div class="text-sm text-gray-500">${srv.id}</div>
+                                        </td>
+                                        <td class="px-4 py-3 text-gray-700">${srv.cliente}</td>
+                                        <td class="px-4 py-3">
+                                            <span class="status-badge bg-purple-100 text-purple-800">${srv.tipo}</span>
+                                        </td>
+                                        <td class="px-4 py-3 text-gray-700 text-sm">${srv.dataInizio} / ${srv.dataFine}</td>
+                                        <td class="px-4 py-3">
+                                            <span class="status-badge status-${srv.stato.toLowerCase().replace(' ', '-')}">${srv.stato}</span>
+                                        </td>
+                                        <td class="px-4 py-3 text-center font-semibold">${srv.persone}</td>
+                                        <td class="px-4 py-3">
+                                            <div class="flex items-center gap-2">
+                                                <div class="flex-1 bg-gray-200 rounded-full h-2">
+                                                    <div class="bg-gradient-to-r from-purple-600 to-blue-600 h-2 rounded-full" style="width: ${srv.copertura}%"></div>
+                                                </div>
+                                                <span class="text-sm font-semibold">${srv.copertura}%</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `,
+            turni: () => `
+                <div>
+                    <div class="flex items-center gap-3 mb-6">
+                        <i class="fas fa-clock text-3xl text-blue-600"></i>
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-800">Turni</h2>
+                            <p class="text-gray-600">Gestione dei turni operativi</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-6 flex gap-4">
+                        <button class="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-semibold hover:shadow-lg transition">
+                            <i class="fas fa-plus mr-2"></i>Nuovo Turno
+                        </button>
+                        <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition">
+                            <i class="fas fa-calendar mr-2"></i>Vista Calendario
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50 border-b-2 border-gray-200">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">ID</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Servizio</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Operatore</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Ruolo</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Data</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Orario</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Stato</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.turni.map(turno => `
+                                    <tr class="table-row border-b border-gray-100">
+                                        <td class="px-4 py-3 text-gray-700 font-mono">${turno.id}</td>
+                                        <td class="px-4 py-3 font-medium text-gray-900">${turno.servizio}</td>
+                                        <td class="px-4 py-3 text-gray-700">${turno.operatore}</td>
+                                        <td class="px-4 py-3">
+                                            <span class="status-badge bg-blue-100 text-blue-800">${turno.ruolo}</span>
+                                        </td>
+                                        <td class="px-4 py-3 text-gray-700">${turno.data}</td>
+                                        <td class="px-4 py-3 text-gray-700 font-semibold">${turno.orario}</td>
+                                        <td class="px-4 py-3">
+                                            <span class="status-badge status-${turno.stato.toLowerCase().replace(' ', '-')}">${turno.stato}</span>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `,
+            operatori: () => `
+                <div>
+                    <div class="flex items-center gap-3 mb-6">
+                        <i class="fas fa-users text-3xl text-green-600"></i>
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-800">Operatori</h2>
+                            <p class="text-gray-600">Gestione del personale</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-6 flex gap-4">
+                        <button class="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-semibold hover:shadow-lg transition">
+                            <i class="fas fa-plus mr-2"></i>Nuovo Operatore
+                        </button>
+                        <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition">
+                            <i class="fas fa-filter mr-2"></i>Filtri
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        ${data.operatori.map(op => `
+                            <div class="border-2 border-gray-200 rounded-lg p-6 hover:shadow-lg transition">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                                            ${op.nome.split(' ').map(n => n[0]).join('')}
+                                        </div>
+                                        <div>
+                                            <h3 class="font-bold text-lg text-gray-900">${op.nome}</h3>
+                                            <p class="text-sm text-gray-600">${op.qualifica}</p>
+                                        </div>
+                                    </div>
+                                    <span class="status-badge ${op.disponibile ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                        ${op.disponibile ? 'Disponibile' : 'Occupato'}
+                                    </span>
+                                </div>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex items-center gap-2 text-gray-700">
+                                        <i class="fas fa-phone w-4"></i>
+                                        <span>${op.telefono}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-gray-700">
+                                        <i class="fas fa-envelope w-4"></i>
+                                        <span>${op.email}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-gray-700">
+                                        <i class="fas fa-calendar-check w-4"></i>
+                                        <span>${op.turniMese} turni questo mese</span>
+                                    </div>
+                                </div>
+                                <div class="mt-4 flex gap-2">
+                                    <button class="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition">
+                                        <i class="fas fa-eye mr-1"></i>Dettagli
+                                    </button>
+                                    <button class="flex-1 px-3 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm hover:bg-gray-300 transition">
+                                        <i class="fas fa-edit mr-1"></i>Modifica
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `,
+            timesheet: () => `
+                <div>
+                    <div class="flex items-center gap-3 mb-6">
+                        <i class="fas fa-clipboard-check text-3xl text-indigo-600"></i>
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-800">Timesheet</h2>
+                            <p class="text-gray-600">Gestione delle ore lavorate</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-6 flex gap-4">
+                        <button class="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-semibold hover:shadow-lg transition">
+                            <i class="fas fa-plus mr-2"></i>Nuova Registrazione
+                        </button>
+                        <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition">
+                            <i class="fas fa-download mr-2"></i>Esporta
+                        </button>
+                    </div>
+
+                    <div class="bg-blue-50 border-l-4 border-blue-600 p-4 mb-6 rounded">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-info-circle text-blue-600 text-xl"></i>
+                            <div>
+                                <p class="font-semibold text-gray-800">Timesheet in corso di implementazione</p>
+                                <p class="text-sm text-gray-600">Questa sezione sarà disponibile nella prossima versione</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-lg p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm opacity-90">Ore Mese Corrente</p>
+                                    <p class="text-3xl font-bold mt-2">1,247</p>
+                                </div>
+                                <i class="fas fa-clock text-5xl opacity-30"></i>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-lg p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm opacity-90">Ore Approvate</p>
+                                    <p class="text-3xl font-bold mt-2">1,180</p>
+                                </div>
+                                <i class="fas fa-check-circle text-5xl opacity-30"></i>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white rounded-lg p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm opacity-90">In Attesa</p>
+                                    <p class="text-3xl font-bold mt-2">67</p>
+                                </div>
+                                <i class="fas fa-hourglass-half text-5xl opacity-30"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            commesse: () => `
+                <div>
+                    <div class="flex items-center gap-3 mb-6">
+                        <i class="fas fa-briefcase text-3xl text-purple-600"></i>
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-800">Commesse</h2>
+                            <p class="text-gray-600">Gestione delle commesse aziendali</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-6 flex gap-4">
+                        <button class="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-semibold hover:shadow-lg transition">
+                            <i class="fas fa-plus mr-2"></i>Nuova Commessa
+                        </button>
+                        <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition">
+                            <i class="fas fa-chart-bar mr-2"></i>Report
+                        </button>
+                    </div>
+
+                    <div class="space-y-4">
+                        ${data.commesse.map(com => `
+                            <div class="border-2 border-gray-200 rounded-lg p-6 hover:shadow-lg transition">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div>
+                                        <h3 class="font-bold text-xl text-gray-900">${com.nome}</h3>
+                                        <p class="text-gray-600">${com.cliente}</p>
+                                        <p class="text-sm text-gray-500 mt-1">${com.id}</p>
+                                    </div>
+                                    <span class="status-badge status-in-corso">${com.stato}</span>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                                    <div>
+                                        <p class="text-sm text-gray-500">Valore Totale</p>
+                                        <p class="text-lg font-bold text-gray-900">${com.valore}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Fatturato</p>
+                                        <p class="text-lg font-bold text-green-600">${com.fatturato}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Data Inizio</p>
+                                        <p class="text-lg font-semibold text-gray-700">${com.dataInizio}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Data Fine</p>
+                                        <p class="text-lg font-semibold text-gray-700">${com.dataFine}</p>
+                                    </div>
+                                </div>
+                                <div class="mb-2">
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="text-gray-600">Avanzamento</span>
+                                        <span class="font-semibold text-gray-800">50%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-3">
+                                        <div class="bg-gradient-to-r from-purple-600 to-blue-600 h-3 rounded-full" style="width: 50%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `,
+            calendario: () => `
+                <div>
+                    <div class="flex items-center gap-3 mb-6">
+                        <i class="fas fa-calendar text-3xl text-blue-600"></i>
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-800">Calendario</h2>
+                            <p class="text-gray-600">Vista calendario dei servizi e turni</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-6 flex gap-4">
+                        <button class="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-semibold hover:shadow-lg transition">
+                            <i class="fas fa-calendar-day mr-2"></i>Oggi
+                        </button>
+                        <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition">
+                            <i class="fas fa-calendar-week mr-2"></i>Settimana
+                        </button>
+                        <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition">
+                            <i class="fas fa-calendar-alt mr-2"></i>Mese
+                        </button>
+                    </div>
+
+                    <div class="bg-yellow-50 border-l-4 border-yellow-600 p-4 mb-6 rounded">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-calendar-check text-yellow-600 text-xl"></i>
+                            <div>
+                                <p class="font-semibold text-gray-800">Vista Calendario in sviluppo</p>
+                                <p class="text-sm text-gray-600">Il calendario interattivo sarà disponibile nella prossima release</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border-2 border-gray-200 rounded-lg p-8 text-center">
+                        <i class="fas fa-calendar-alt text-6xl text-gray-300 mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-700 mb-2">Calendario Interattivo</h3>
+                        <p class="text-gray-600">Visualizzazione mensile e settimanale dei servizi pianificati</p>
+                    </div>
+                </div>
+            `,
+            amministrazione: () => `
+                <div>
+                    <div class="flex items-center gap-3 mb-6">
+                        <i class="fas fa-euro-sign text-3xl text-green-600"></i>
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-800">Amministrazione</h2>
+                            <p class="text-gray-600">Gestione economica e fatturazione</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-6 flex gap-4">
+                        <button class="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-semibold hover:shadow-lg transition">
+                            <i class="fas fa-file-invoice mr-2"></i>Nuova Fattura
+                        </button>
+                        <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition">
+                            <i class="fas fa-chart-line mr-2"></i>Report Economico
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                        <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-lg p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm opacity-90">Fatturato Mese</p>
+                                    <p class="text-3xl font-bold mt-2">€ 142.350</p>
+                                </div>
+                                <i class="fas fa-euro-sign text-5xl opacity-30"></i>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-lg p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm opacity-90">Fatture Emesse</p>
+                                    <p class="text-3xl font-bold mt-2">37</p>
+                                </div>
+                                <i class="fas fa-file-invoice text-5xl opacity-30"></i>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white rounded-lg p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm opacity-90">In Attesa Pag.</p>
+                                    <p class="text-3xl font-bold mt-2">€ 28.500</p>
+                                </div>
+                                <i class="fas fa-hourglass-half text-5xl opacity-30"></i>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-lg p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm opacity-90">Clienti Attivi</p>
+                                    <p class="text-3xl font-bold mt-2">24</p>
+                                </div>
+                                <i class="fas fa-users text-5xl opacity-30"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-purple-50 border-l-4 border-purple-600 p-4 rounded">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-info-circle text-purple-600 text-xl"></i>
+                            <div>
+                                <p class="font-semibold text-gray-800">Sezione in fase di completamento</p>
+                                <p class="text-sm text-gray-600">Le funzionalità di fatturazione e gestione economica saranno completate a breve</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `
+        };
+
+        // Navigation function
+        function showPage(pageId) {
+            // Update content
+            document.getElementById('content').innerHTML = pages[pageId]();
+
+            // Update active nav item
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.nav-item').classList.add('active');
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Load dashboard on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            showPage('dashboard');
+        });
+    </script>
+</body>
+</html>
