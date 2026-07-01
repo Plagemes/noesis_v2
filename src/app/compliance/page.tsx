@@ -121,7 +121,6 @@ export default function CompliancePage() {
         icon={Shield}
         action={{
           label: 'Nuovo Audit',
-          icon: Plus,
           onClick: () => alert('Pianificazione nuovo audit')
         }}
       />

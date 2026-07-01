@@ -80,7 +80,6 @@ export default function ReportPage() {
         icon={BarChart3}
         action={{
           label: 'Genera Report',
-          icon: Plus,
           onClick: () => alert('Generazione nuovo report')
         }}
       />

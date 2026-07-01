@@ -125,7 +125,6 @@ export default function DocumentiPage() {
         icon={FileStack}
         action={{
           label: 'Carica Documento',
-          icon: Plus,
           onClick: () => alert('Apertura upload documento')
         }}
       />
