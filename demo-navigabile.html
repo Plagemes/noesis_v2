@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOESIS OS - Demo Navigabile Completa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            min-height: 100vh;
+        }
+
+        .glass-card {
+            backdrop-filter: blur(16px);
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 280px;
+            background: rgba(30, 27, 75, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 2rem 1rem;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem 1rem;
+            margin: 0.25rem 0;
+            border-radius: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        .main-content {
+            margin-left: 280px;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .kpi-card {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(99, 102, 241, 0.4);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.375rem 0.875rem;
+            border-radius: 9999px;
+            font-size: 0.813rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .badge-alta { background: #fee2e2; color: #991b1b; }
+        .badge-media { background: #fef3c7; color: #92400e; }
+        .badge-bassa { background: #d1fae5; color: #065f46; }
+        .badge-aperto { background: #dbeafe; color: #1e40af; }
+        .badge-chiuso { background: #e5e7eb; color: #374151; }
+        .badge-confermato { background: #d1fae5; color: #065f46; }
+        .badge-richiesto { background: #fef3c7; color: #92400e; }
+        .badge-completato { background: #e5e7eb; color: #374151; }
+        .badge-corso { background: #dbeafe; color: #1e40af; }
+
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .data-table thead th {
+            background: rgba(99, 102, 241, 0.1);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #4b5563;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .data-table tbody tr {
+            transition: all 0.2s ease;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .data-table tbody tr:hover {
+            background: rgba(99, 102, 241, 0.05);
+            transform: scale(1.01);
+        }
+
+        .data-table tbody td {
+            padding: 1rem;
+        }
+
+        .page-section {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .page-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-mini {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .chart-placeholder {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            color: #6366f1;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+            .nav-item span {
+                display: none;
+            }
+            .main-content {
+                margin-left: 70px;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="mb-8 text-center">
+            <h1 class="text-2xl font-bold text-white mb-1">NOESIS OS</h1>
+            <p class="text-xs text-gray-400">Centro Operativo</p>
+        </div>
+
+        <nav>
+            <div class="nav-item active" onclick="showPage('dashboard')">
+                <i class="fas fa-chart-line text-lg"></i>
+                <span>Dashboard</span>
+            </div>
+            <div class="nav-item" onclick="showPage('alert')">
+                <i class="fas fa-exclamation-triangle text-lg"></i>
+                <span>Alert</span>
+            </div>
+            <div class="nav-item" onclick="showPage('servizi')">
+                <i class="fas fa-calendar-alt text-lg"></i>
+                <span>Servizi</span>
+            </div>
+            <div class="nav-item" onclick="showPage('turni')">
+                <i class="fas fa-clock text-lg"></i>
+                <span>Turni</span>
+            </div>
+            <div class="nav-item" onclick="showPage('operatori')">
+                <i class="fas fa-users text-lg"></i>
+                <span>Operatori</span>
+            </div>
+            <div class="nav-item" onclick="showPage('clienti')">
+                <i class="fas fa-building text-lg"></i>
+                <span>Clienti</span>
+            </div>
+            <div class="nav-item" onclick="showPage('commesse')">
+                <i class="fas fa-briefcase text-lg"></i>
+                <span>Commesse</span>
+            </div>
+            <div class="nav-item" onclick="showPage('timesheet')">
+                <i class="fas fa-stopwatch text-lg"></i>
+                <span>Timesheet</span>
+            </div>
+            <div class="nav-item" onclick="showPage('documenti')">
+                <i class="fas fa-file-alt text-lg"></i>
+                <span>Documenti</span>
+            </div>
+            <div class="nav-item" onclick="showPage('report')">
+                <i class="fas fa-chart-bar text-lg"></i>
+                <span>Report</span>
+            </div>
+            <div class="nav-item" onclick="showPage('amministrazione')">
+                <i class="fas fa-calculator text-lg"></i>
+                <span>Amministrazione</span>
+            </div>
+            <div class="nav-item" onclick="showPage('compliance')">
+                <i class="fas fa-shield-alt text-lg"></i>
+                <span>Compliance</span>
+            </div>
+            <div class="nav-item" onclick="showPage('calendario')">
+                <i class="fas fa-calendar text-lg"></i>
+                <span>Calendario</span>
+            </div>
+            <div class="nav-item" onclick="showPage('ai-assistant')">
+                <i class="fas fa-robot text-lg"></i>
+                <span>AI Assistant</span>
+            </div>
+            <div class="nav-item" onclick="showPage('impostazioni')">
+                <i class="fas fa-cog text-lg"></i>
+                <span>Impostazioni</span>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Dashboard -->
+        <div id="dashboard" class="page-section active">
+            <div class="glass-card p-6 mb-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-800 mb-2">Dashboard</h2>
+                        <p class="text-gray-600">Panoramica generale del centro operativo</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-gray-500">1 Luglio 2026</p>
+                        <p class="font-semibold text-gray-700">Demo Operativa</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <div class="kpi-card">
+                    <div class="flex items-center justify-between mb-2">
+                        <i class="fas fa-exclamation-circle text-2xl opacity-80"></i>
+                        <span class="stat-mini">+3 oggi</span>
+                    </div>
+                    <div class="text-4xl font-bold mb-1">12</div>
+                    <div class="text-sm opacity-90">Alert Aperti</div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="flex items-center justify-between mb-2">
+                        <i class="fas fa-calendar-check text-2xl opacity-80"></i>
+                        <span class="stat-mini">91% copertura</span>
+                    </div>
+                    <div class="text-4xl font-bold mb-1">28</div>
+                    <div class="text-sm opacity-90">Servizi Attivi</div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="flex items-center justify-between mb-2">
+                        <i class="fas fa-users text-2xl opacity-80"></i>
+                        <span class="stat-mini">18 disponibili</span>
+                    </div>
+                    <div class="text-4xl font-bold mb-1">24</div>
+                    <div class="text-sm opacity-90">Operatori</div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="flex items-center justify-between mb-2">
+                        <i class="fas fa-chart-line text-2xl opacity-80"></i>
+                        <span class="stat-mini">30.2% margine</span>
+                    </div>
+                    <div class="text-4xl font-bold mb-1">15</div>
+                    <div class="text-sm opacity-90">Commesse</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Alert Recenti -->
+                <div class="glass-card p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-exclamation-triangle text-yellow-600"></i>
+                        Alert Recenti
+                    </h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Alert</th>
+                                <th>Priorità</th>
+                                <th>Assegnato</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="font-semibold">Turno Scoperto - Accoglienza</div>
+                                    <div class="text-xs text-gray-500">Pianificazione Servizio</div>
+                                </td>
+                                <td><span class="status-badge badge-alta">Alta</span></td>
+                                <td>Marco Rossi</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="font-semibold">Ore Budget Commessa</div>
+                                    <div class="text-xs text-gray-500">Controllo Economico</div>
+                                </td>
+                                <td><span class="status-badge badge-media">Media</span></td>
+                                <td>Giulia Verdi</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="font-semibold">Scadenza Certificazioni</div>
+                                    <div class="text-xs text-gray-500">Compliance</div>
+                                </td>
+                                <td><span class="status-badge badge-alta">Alta</span></td>
+                                <td>Luca Bianchi</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Prossimi Turni -->
+                <div class="glass-card p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-clock text-blue-600"></i>
+                        Prossimi Turni
+                    </h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Turno</th>
+                                <th>Stato</th>
+                                <th>Persone</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="font-semibold">Portineria Nord - Mattina</div>
+                                    <div class="text-xs text-gray-500">01/07/2026</div>
+                                </td>
+                                <td><span class="status-badge badge-confermato">Confermato</span></td>
+                                <td>2</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="font-semibold">Accoglienza - Pomeriggio</div>
+                                    <div class="text-xs text-gray-500">01/07/2026</div>
+                                </td>
+                                <td><span class="status-badge badge-richiesto">Richiesto</span></td>
+                                <td>1</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="font-semibold">Sicurezza - Notte</div>
+                                    <div class="text-xs text-gray-500">01/07/2026</div>
+                                </td>
+                                <td><span class="status-badge badge-confermato">Confermato</span></td>
+                                <td>3</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Mini Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                <div class="glass-card p-6">
+                    <div class="flex items-center gap-3 mb-3">
+                        <i class="fas fa-euro-sign text-3xl text-purple-600"></i>
+                        <div>
+                            <div class="text-3xl font-bold text-gray-800">€ 142.840</div>
+                            <div class="text-sm text-gray-600">Fatturato Giugno</div>
+                        </div>
+                    </div>
+                    <div class="text-xs text-green-600 font-semibold">↑ +12% vs Maggio</div>
+                </div>
+
+                <div class="glass-card p-6">
+                    <div class="flex items-center gap-3 mb-3">
+                        <i class="fas fa-percentage text-3xl text-purple-600"></i>
+                        <div>
+                            <div class="text-3xl font-bold text-gray-800">30.2%</div>
+                            <div class="text-sm text-gray-600">Margine Medio</div>
+                        </div>
+                    </div>
+                    <div class="text-xs text-green-600 font-semibold">↑ +1.5% vs target</div>
+                </div>
+
+                <div class="glass-card p-6">
+                    <div class="flex items-center gap-3 mb-3">
+                        <i class="fas fa-check-circle text-3xl text-purple-600"></i>
+                        <div>
+                            <div class="text-3xl font-bold text-gray-800">91%</div>
+                            <div class="text-sm text-gray-600">Copertura Servizi</div>
+                        </div>
+                    </div>
+                    <div class="text-xs text-yellow-600 font-semibold">⚠ -5% vs obiettivo</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert -->
+        <div id="alert" class="page-section">
+            <div class="glass-card p-6 mb-6">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Gestione Alert</h2>
+                <p class="text-gray-600">Monitora e gestisci tutte le segnalazioni operative</p>
+            </div>
+
+            <div class="glass-card p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex gap-3">
+                        <button class="btn-primary">
+                            <i class="fas fa-plus mr-2"></i>Nuovo Alert
+                        </button>
+                        <button class="btn-primary" style="background: white; color: #6366f1; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                            <i class="fas fa-filter mr-2"></i>Filtra
+                        </button>
+                    </div>
+                    <div>
+                        <span class="status-badge badge-alta mr-2">12 Aperti</span>
+                        <span class="status-badge badge-chiuso">45 Chiusi</span>
+                    </div>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Alert</th>
+                            <th>Tipo</th>
+                            <th>Priorità</th>
+                            <th>Assegnato</th>
+                            <th>Data</th>
+                            <th>Stato</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="font-mono text-sm">#AL-001</td>
+                            <td>
+                                <div class="font-semibold">Turno Scoperto - Accoglienza</div>
+                                <div class="text-xs text-gray-500">Servizio ACG-2026-001</div>
+                            </td>
+                            <td>Pianificazione</td>
+                            <td><span class="status-badge badge-alta">Alta</span></td>
+                            <td>Marco Rossi</td>
+                            <td>29/06/2026</td>
+                            <td><span class="status-badge badge-aperto">Aperto</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-mono text-sm">#AL-002</td>
+                            <td>
+                                <div class="font-semibold">Ore Budget Commessa</div>
+                                <div class="text-xs text-gray-500">90% ore consumate</div>
+                            </td>
+                            <td>Controllo Economico</td>
+                            <td><span class="status-badge badge-media">Media</span></td>
+                            <td>Giulia Verdi</td>
+                            <td>28/06/2026</td>
+                            <td><span class="status-badge badge-aperto">Aperto</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-mono text-sm">#AL-003</td>
+                            <td>
+                                <div class="font-semibold">Scadenza Certificazioni</div>
+                                <div class="text-xs text-gray-500">3 operatori da rinnovare</div>
+                            </td>
+                            <td>Compliance</td>
+                            <td><span class="status-badge badge-alta">Alta</span></td>
+                            <td>Luca Bianchi</td>
+                            <td>27/06/2026</td>
+                            <td><span class="status-badge badge-corso">In corso</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-mono text-sm">#AL-004</td>
+                            <td>
+                                <div class="font-semibold">Mancata Conferma Turno</div>
+                                <div class="text-xs text-gray-500">Turno del 02/07</div>
+                            </td>
+                            <td>Pianificazione</td>
+                            <td><span class="status-badge badge-media">Media</span></td>
+                            <td>Anna Neri</td>
+                            <td>30/06/2026</td>
+                            <td><span class="status-badge badge-aperto">Aperto</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-mono text-sm">#AL-005</td>
+                            <td>
+                                <div class="font-semibold">Documento Mancante</div>
+                                <div class="text-xs text-gray-500">DUVRI non caricato</div>
+                            </td>
+                            <td>Documentale</td>
+                            <td><span class="status-badge badge-bassa">Bassa</span></td>
+                            <td>Mario Blu</td>
+                            <td>25/06/2026</td>
+                            <td><span class="status-badge badge-chiuso">Chiuso</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Servizi -->
+        <div id="servizi" class="page-section">
+            <div class="glass-card p-6 mb-6">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Gestione Servizi</h2>
+                <p class="text-gray-600">Monitora contratti, servizi attivi e pianificazione</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="kpi-card">
+                    <div class="text-4xl font-bold mb-2">28</div>
+                    <div class="text-sm opacity-90">Servizi Attivi</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="text-4xl font-bold mb-2">91%</div>
+                    <div class="text-sm opacity-90">Copertura Media</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="text-4xl font-bold mb-2">€ 45.200</div>
+                    <div class="text-sm opacity-90">Fatturato Mensile</div>
+                </div>
+            </div>
+
+            <div class="glass-card p-6">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Codice</th>
+                            <th>Nome Servizio</th>
+                            <th>Cliente</th>
+                            <th>Inizio</th>
+                            <th>Fine</th>
+                            <th>Copertura</th>
+                            <th>Stato</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="font-mono text-sm">SRV-001</td>
+                            <td class="font-semibold">Portineria Nord</td>
+                            <td>ALFA SpA</td>
+                            <td>01/01/2026</td>
+                            <td>31/12/2026</td>
+                            <td>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-24 bg-gray-200 rounded-full h-2">
+                                        <div class="bg-green-500 h-2 rounded-full" style="width: 95%"></div>
+                                    </div>
+                                    <span class="text-sm font-semibold">95%</span>
+                                </div>
+                            </td>
+                            <td><span class="status-badge badge-confermato">Attivo</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-mono text-sm">SRV-002</td>
+                            <td class="font-semibold">Accoglienza</td>
+                            <td>BETA Srl</td>
+                            <td>15/03/2026</td>
+                            <td>14/03/2027</td>
+                            <td>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-24 bg-gray-200 rounded-full h-2">
+                                        <div class="bg-yellow-500 h-2 rounded-full" style="width: 78%"></div>
+                                    </div>
+                                    <span class="text-sm font-semibold">78%</span>
+                                </div>
+                            </td>
+                            <td><span class="status-badge badge-richiesto">Incompleto</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-mono text-sm">SRV-003</td>
+                            <td class="font-semibold">Sicurezza H24</td>
+                            <td>GAMMA Srl</td>
+                            <td>01/06/2026</td>
+                            <td>31/12/2026</td>
+                            <td>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-24 bg-gray-200 rounded-full h-2">
+                                        <div class="bg-green-500 h-2 rounded-full" style="width: 100%"></div>
+                                    </div>
+                                    <span class="text-sm font-semibold">100%</span>
+                                </div>
+                            </td>
+                            <td><span class="status-badge badge-confermato">Attivo</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Turni -->
+        <div id="turni" class="page-section">
+            <div class="glass-card p-6 mb-6">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Pianificazione Turni</h2>
+                <p class="text-gray-600">Gestisci turni, assegnazioni e disponibilità</p>
+            </div>
+
+            <div class="glass-card p-6 mb-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex gap-3">
+                        <button class="btn-primary">
+                            <i class="fas fa-plus mr-2"></i>Nuovo Turno
+                        </button>
+                        <button class="btn-primary" style="background: white; color: #6366f1;">
+                            <i class="fas fa-calendar mr-2"></i>Vista Calendario
+                        </button>
+                    </div>
+                    <div>
+                        <span class="status-badge badge-confermato mr-2">45 Confermati</span>
+                        <span class="status-badge badge-richiesto">8 Da confermare</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card p-6">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Codice</th>
+                            <th>Turno</th>
+                            <th>Servizio</th>
+                            <th>Operatore</th>
+                            <th>Orario</th>
+                            <th>Data</th>
+                            <th>Stato</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="font-mono text-sm">TRN-001</td>
+                            <td class="font-semibold">Mattina</td>
+                            <td>Portineria Nord</td>
+                            <td>Marco Rossi</td>
+                            <td>06:00 - 14:00</td>
+                            <td>01/07/2026</td>
+                            <td><span class="status-badge badge-confermato">Confermato</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-mono text-sm">TRN-002</td>
+                            <td class="font-semibold">Pomeriggio</td>
+                            <td>Accoglienza</td>
+                            <td>Giulia Verdi</td>
+                            <td>14:00 - 22:00</td>
+                            <td>01/07/2026</td>
+                            <td><span class="status-badge badge-richiesto">Richiesto</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-mono text-sm">TRN-003</td>
+                            <td class="font-semibold">Notte</td>
+                            <td>Sicurezza H24</td>
+                            <td>Luca Bianchi</td>
+                            <td>22:00 - 06:00</td>
+                            <td>01/07/2026</td>
+                            <td><span class="status-badge badge-confermato">Confermato</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-mono text-sm">TRN-004</td>
+                            <td class="font-semibold">Mattina</td>
+                            <td>Portineria Sud</td>
+                            <td>Anna Neri</td>
+                            <td>06:00 - 14:00</td>
+                            <td>02/07/2026</td>
+                            <td><span class="status-badge badge-confermato">Confermato</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Operatori -->
+        <div id="operatori" class="page-section">
+            <div class="glass-card p-6 mb-6">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Gestione Operatori</h2>
+                <p class="text-gray-600">Anagrafica, qualifiche, certificazioni e disponibilità</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                <div class="kpi-card">
+                    <div class="text-4xl font-bold mb-2">24</div>
+                    <div class="text-sm opacity-90">Operatori Totali</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="text-4xl font-bold mb-2">18</div>
+                    <div class="text-sm opacity-90">Disponibili</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="text-4xl font-bold mb-2">3</div>
+                    <div class="text-sm opacity-90">In Ferie</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="text-4xl font-bold mb-2">98%</div>
+                    <div class="text-sm opacity-90">Certificazioni OK</div>
+                </div>
+            </div>
+
+            <div class="glass-card p-6">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Matricola</th>
+                            <th>Nome</th>
+                            <th>Qualifiche</th>
+                            <th>Certificazioni</th>
+                            <th>Ore Mese</th>
+                            <th>Stato</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="font-mono text-sm">OP-001</td>
+                            <td class="font-semibold">Marco Rossi</td>
+                            <td>
+                                <span class="status-badge badge-confermato mr-1">Portineria</span>
+                                <span class="status-badge badge-confermato">Sicurezza</span>
+                            </td>
+                            <td>✓ RLST, ✓ PS, ✓ Antincendio</td>
+                            <td>168h / 173h</td>
+                            <td><span class="status-badge badge-confermato">Disponibile</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-mono text-sm">OP-002</td>
+                            <td class="font-semibold">Giulia Verdi</td>
+                            <td>
+                                <span class="status-badge badge-confermato">Accoglienza</span>
+                            </td>
+                            <td>✓ Accoglienza, ✓ PS</td>
+                            <td>152h / 173h</td>
+                            <td><span class="status-badge badge-confermato">Disponibile</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-mono text-sm">OP-003</td>
+                            <td class="font-semibold">Luca Bianchi</td>
+                            <td>
+                                <span class="status-badge badge-confermato mr-1">Sicurezza</span>
+                                <span class="status-badge badge-confermato">GPG</span>
+                            </td>
+                            <td>✓ GPG, ⚠ Antincendio (scad)</td>
+                            <td>180h / 173h</td>
+                            <td><span class="status-badge badge-richiesto">Alert</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-mono text-sm">OP-004</td>
+                            <td class="font-semibold">Anna Neri</td>
+                            <td>
+                                <span class="status-badge badge-confermato">Portineria</span>
+                            </td>
+                            <td>✓ RLST, ✓ PS</td>
+                            <td>0h / 173h</td>
+                            <td><span class="status-badge badge-chiuso">In Ferie</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Clienti -->
+        <div id="clienti" class="page-section">
+            <div class="glass-card p-6 mb-6">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Gestione Clienti</h2>
+                <p class="text-gray-600">Anagrafica clienti, contratti e servizi attivi</p>
+            </div>
+
+            <div class="glass-card p-6">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Codice</th>
+                            <th>Ragione Sociale</th>
+                            <th>Settore</th>
+                            <th>Servizi Attivi</th>
+                            <th>Fatturato Anno</th>
+                            <th>Stato</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="font-mono text-sm">CLI-001</td>
+                            <td class="font-semibold">ALFA SpA</td>
+                            <td>Manifatturiero</td>
+                            <td>8</td>
+                            <td>€ 245.000</td>
+                            <td><span class="status-badge badge-confermato">Attivo</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-mono text-sm">CLI-002</td>
+                            <td class="font-semibold">BETA Srl</td>
+                            <td>Logistica</td>
+                            <td>5</td>
+                            <td>€ 180.000</td>
+                            <td><span class="status-badge badge-confermato">Attivo</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-mono text-sm">CLI-003</td>
+                            <td class="font-semibold">GAMMA Srl</td>
+                            <td>Terziario</td>
+                            <td>12</td>
+                            <td>€ 420.000</td>
+                            <td><span class="status-badge badge-confermato">Attivo</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Commesse -->
+        <div id="commesse" class="page-section">
+            <div class="glass-card p-6 mb-6">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Gestione Commesse</h2>
+                <p class="text-gray-600">Monitora economicità, budget e margini</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="kpi-card">
+                    <div class="text-4xl font-bold mb-2">15</div>
+                    <div class="text-sm opacity-90">Commesse Attive</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="text-4xl font-bold mb-2">30.2%</div>
+                    <div class="text-sm opacity-90">Margine Medio</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="text-4xl font-bold mb-2">€ 845K</div>
+                    <div class="text-sm opacity-90">Valore Totale</div>
+                </div>
+            </div>
+
+            <div class="glass-card p-6">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Codice</th>
+                            <th>Commessa</th>
+                            <th>Cliente</th>
+                            <th>Budget</th>
+                            <th>Consumato</th>
+                            <th>Margine</th>
+                            <th>Stato</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="font-mono text-sm">COM-001</td>
+                            <td class="font-semibold">Portineria ALFA</td>
+                            <td>ALFA SpA</td>
+                            <td>€ 120.000</td>
+                            <td>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-24 bg-gray-200 rounded-full h-2">
+                                        <div class="bg-green-500 h-2 rounded-full" style="width: 65%"></div>
+                                    </div>
+                                    <span class="text-sm">65%</span>
+                                </div>
+                            </td>
+                            <td class="font-semibold text-green-600">32%</td>
+                            <td><span class="status-badge badge-corso">In corso</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-mono text-sm">COM-002</td>
+                            <td class="font-semibold">Sicurezza BETA</td>
+                            <td>BETA Srl</td>
+                            <td>€ 95.000</td>
+                            <td>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-24 bg-gray-200 rounded-full h-2">
+                                        <div class="bg-yellow-500 h-2 rounded-full" style="width: 88%"></div>
+                                    </div>
+                                    <span class="text-sm">88%</span>
+                                </div>
+                            </td>
+                            <td class="font-semibold text-yellow-600">18%</td>
+                            <td><span class="status-badge badge-richiesto">Alert budget</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-mono text-sm">COM-003</td>
+                            <td class="font-semibold">Facility GAMMA</td>
+                            <td>GAMMA Srl</td>
+                            <td>€ 210.000</td>
+                            <td>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-24 bg-gray-200 rounded-full h-2">
+                                        <div class="bg-green-500 h-2 rounded-full" style="width: 45%"></div>
+                                    </div>
+                                    <span class="text-sm">45%</span>
+                                </div>
+                            </td>
+                            <td class="font-semibold text-green-600">35%</td>
+                            <td><span class="status-badge badge-corso">In corso</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Timesheet -->
+        <div id="timesheet" class="page-section">
+            <div class="glass-card p-6 mb-6">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Timesheet</h2>
+                <p class="text-gray-600">Registrazione ore, validazione e reportistica</p>
+            </div>
+
+            <div class="glass-card p-6">
+                <div class="chart-placeholder">
+                    <i class="fas fa-chart-bar text-6xl mb-4"></i>
+                    <p>Grafico ore lavorate per operatore</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Documenti -->
+        <div id="documenti" class="page-section">
+            <div class="glass-card p-6 mb-6">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Gestione Documenti</h2>
+                <p class="text-gray-600">Archivio documentale organizzato per tipo e servizio</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-card p-6 hover:shadow-xl transition-all cursor-pointer">
+                    <i class="fas fa-file-contract text-4xl text-purple-600 mb-3"></i>
+                    <h3 class="text-xl font-bold mb-2">Contratti</h3>
+                    <p class="text-3xl font-bold text-purple-600">28</p>
+                    <p class="text-sm text-gray-600 mt-2">Documenti attivi</p>
+                </div>
+                <div class="glass-card p-6 hover:shadow-xl transition-all cursor-pointer">
+                    <i class="fas fa-certificate text-4xl text-purple-600 mb-3"></i>
+                    <h3 class="text-xl font-bold mb-2">Certificazioni</h3>
+                    <p class="text-3xl font-bold text-purple-600">156</p>
+                    <p class="text-sm text-gray-600 mt-2">Certificati operatori</p>
+                </div>
+                <div class="glass-card p-6 hover:shadow-xl transition-all cursor-pointer">
+                    <i class="fas fa-file-alt text-4xl text-purple-600 mb-3"></i>
+                    <h3 class="text-xl font-bold mb-2">Altri Documenti</h3>
+                    <p class="text-3xl font-bold text-purple-600">342</p>
+                    <p class="text-sm text-gray-600 mt-2">DUVRI, procedure, etc.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report -->
+        <div id="report" class="page-section">
+            <div class="glass-card p-6 mb-6">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Report e Analytics</h2>
+                <p class="text-gray-600">Dashboard avanzati e reportistica personalizzata</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="glass-card p-6">
+                    <h3 class="text-lg font-bold mb-4">Andamento Fatturato</h3>
+                    <div class="chart-placeholder">
+                        <i class="fas fa-chart-line text-5xl"></i>
+                        <p class="mt-3">Grafico trend mensile</p>
+                    </div>
+                </div>
+                <div class="glass-card p-6">
+                    <h3 class="text-lg font-bold mb-4">Distribuzione Margini</h3>
+                    <div class="chart-placeholder">
+                        <i class="fas fa-chart-pie text-5xl"></i>
+                        <p class="mt-3">Grafico margini per commessa</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Amministrazione -->
+        <div id="amministrazione" class="page-section">
+            <div class="glass-card p-6 mb-6">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Amministrazione</h2>
+                <p class="text-gray-600">Fatturazione, paghe e contabilità</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-card p-6">
+                    <i class="fas fa-file-invoice text-4xl text-purple-600 mb-3"></i>
+                    <h3 class="text-xl font-bold mb-2">Fatture</h3>
+                    <p class="text-3xl font-bold text-purple-600 mb-2">€ 142.840</p>
+                    <p class="text-sm text-gray-600">Giugno 2026</p>
+                </div>
+                <div class="glass-card p-6">
+                    <i class="fas fa-money-check text-4xl text-purple-600 mb-3"></i>
+                    <h3 class="text-xl font-bold mb-2">Paghe</h3>
+                    <p class="text-3xl font-bold text-purple-600 mb-2">€ 85.200</p>
+                    <p class="text-sm text-gray-600">Costo personale</p>
+                </div>
+                <div class="glass-card p-6">
+                    <i class="fas fa-balance-scale text-4xl text-purple-600 mb-3"></i>
+                    <h3 class="text-xl font-bold mb-2">Margine</h3>
+                    <p class="text-3xl font-bold text-purple-600 mb-2">30.2%</p>
+                    <p class="text-sm text-gray-600">EBITDA %</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Compliance -->
+        <div id="compliance" class="page-section">
+            <div class="glass-card p-6 mb-6">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Compliance & Sicurezza</h2>
+                <p class="text-gray-600">Monitoraggio normative e scadenze</p>
+            </div>
+
+            <div class="glass-card p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="font-bold text-lg mb-4">Scadenze Imminenti</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                                <div>
+                                    <div class="font-semibold">Rinnovo Antincendio</div>
+                                    <div class="text-sm text-gray-600">3 operatori</div>
+                                </div>
+                                <span class="status-badge badge-alta">7 giorni</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+                                <div>
+                                    <div class="font-semibold">Visita Medica</div>
+                                    <div class="text-sm text-gray-600">5 operatori</div>
+                                </div>
+                                <span class="status-badge badge-media">15 giorni</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                                <div>
+                                    <div class="font-semibold">Aggiornamento RLST</div>
+                                    <div class="text-sm text-gray-600">2 operatori</div>
+                                </div>
+                                <span class="status-badge badge-bassa">28 giorni</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg mb-4">Stato Certificazioni</h3>
+                        <div class="chart-placeholder">
+                            <i class="fas fa-check-circle text-5xl"></i>
+                            <p class="mt-3">98% conformità</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendario -->
+        <div id="calendario" class="page-section">
+            <div class="glass-card p-6 mb-6">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Calendario Integrato</h2>
+                <p class="text-gray-600">Vista unificata di turni, scadenze e eventi</p>
+            </div>
+
+            <div class="glass-card p-6">
+                <div class="chart-placeholder" style="min-height: 500px;">
+                    <i class="fas fa-calendar-alt text-6xl mb-4"></i>
+                    <p>Vista calendario mensile</p>
+                    <p class="text-sm text-gray-600 mt-2">Turni, scadenze documenti, eventi aziendali</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Assistant -->
+        <div id="ai-assistant" class="page-section">
+            <div class="glass-card p-6 mb-6">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">AI Assistant</h2>
+                <p class="text-gray-600">Assistente intelligente per analisi e suggerimenti</p>
+            </div>
+
+            <div class="glass-card p-6">
+                <div class="mb-6">
+                    <h3 class="font-bold text-lg mb-4">💡 Suggerimenti AI</h3>
+                    <div class="space-y-3">
+                        <div class="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                            <div class="font-semibold text-blue-900">Ottimizzazione Turni</div>
+                            <p class="text-sm text-blue-700 mt-1">
+                                Rilevato pattern: l'operatore Rossi è disponibile anche per turni notturni.
+                                Possibile riduzione costi del 12% riorganizzando.
+                            </p>
+                        </div>
+                        <div class="p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-500">
+                            <div class="font-semibold text-yellow-900">Alert Budget</div>
+                            <p class="text-sm text-yellow-700 mt-1">
+                                La commessa COM-002 sta per sforare il budget.
+                                Suggerimento: rivedere ore straordinario o rinegoziare.
+                            </p>
+                        </div>
+                        <div class="p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
+                            <div class="font-semibold text-green-900">Performance Positiva</div>
+                            <p class="text-sm text-green-700 mt-1">
+                                Margine commessa COM-003 sopra target del 5%.
+                                Ottima gestione operativa.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-6 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg">
+                    <h4 class="font-bold mb-3">🤖 Chiedi all'AI</h4>
+                    <div class="flex gap-3">
+                        <input
+                            type="text"
+                            placeholder="Es: Quali operatori sono disponibili domani?"
+                            class="flex-1 px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-purple-500 outline-none"
+                        />
+                        <button class="btn-primary">Chiedi</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Impostazioni -->
+        <div id="impostazioni" class="page-section">
+            <div class="glass-card p-6 mb-6">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Impostazioni</h2>
+                <p class="text-gray-600">Configurazione sistema e preferenze</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass-card p-6">
+                    <h3 class="font-bold text-lg mb-4">Profilo Utente</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-sm font-semibold text-gray-600">Nome</label>
+                            <input type="text" value="Demo Operativa" class="w-full mt-1 px-4 py-2 rounded-lg border-2 border-gray-200">
+                        </div>
+                        <div>
+                            <label class="text-sm font-semibold text-gray-600">Email</label>
+                            <input type="email" value="demo@noesis.os" class="w-full mt-1 px-4 py-2 rounded-lg border-2 border-gray-200">
+                        </div>
+                        <div>
+                            <label class="text-sm font-semibold text-gray-600">Ruolo</label>
+                            <select class="w-full mt-1 px-4 py-2 rounded-lg border-2 border-gray-200">
+                                <option>Amministratore</option>
+                                <option>Manager</option>
+                                <option>Operatore</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card p-6">
+                    <h3 class="font-bold text-lg mb-4">Preferenze Sistema</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <span class="font-semibold">Notifiche Email</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer" checked>
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                            </label>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <span class="font-semibold">Alert Automatici</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer" checked>
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                            </label>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <span class="font-semibold">Tema Scuro</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page-section').forEach(page => {
+                page.classList.remove('active');
+            });
+
+            // Remove active class from all nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
+
+            // Add active class to clicked nav item
+            event.currentTarget.classList.add('active');
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('NOESIS OS Demo - Caricato');
+        });
+    </script>
+</body>
+</html>
