@@ -16,7 +16,7 @@ export default function ImpostazioniPage() {
   const [notifichePush, setNotifichePush] = useState(true);
   const [autenticazioneDueFattori, setAutenticazioneDueFattori] = useState(false);
   const [backupAutomatico, setBackupAutomatico] = useState(true);
-  const [tema, setTema] = useState('dark');
+  const [tema, setTema] = useState<string | null>('dark');
 
   const handleSalva = () => {
     alert('Impostazioni salvate con successo!');
