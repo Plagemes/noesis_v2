@@ -103,7 +103,6 @@ export default function ClientiPage() {
         icon={Users}
         action={{
           label: 'Nuovo Cliente',
-          icon: Plus,
           onClick: () => alert('Apertura form nuovo cliente')
         }}
       />
